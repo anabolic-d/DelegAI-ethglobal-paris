@@ -3,12 +3,14 @@ from transformers import pipeline
 import requests
 import json
 from bs4 import BeautifulSoup
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 
 
 # Define the API endpoint to handle POST requests
-@app.route('/scrape_cooked_text', methods=['POST'])
+@app.route('/get_tendancy', methods=['POST'])
 def scrape_cooked_text_api():
     data = request.json  # Assuming JSON data with a "url" field containing the target URL
     url = data.get('url', None)
@@ -20,9 +22,8 @@ def scrape_cooked_text_api():
     response = requests.get(url, headers=headers)
      # Raise an exception for any HTTP errors
     print(response.raise_for_status())
-    html_content = response
 
-    json_content = json.loads(html_content.content)
+    json_content = json.loads(response.content)
 
     for item in json_content["post_stream"]["posts"]:
         soup = BeautifulSoup(item["cooked"], "html.parser")
@@ -49,7 +50,7 @@ def scrape_cooked_text_api():
         return jsonify({'error': 'Missing URL'}), 400
 
     try:
-        return jsonify({'success': True, 'deneme': positive  / counter * 100})
+        return jsonify({'success': True, 'tendancy': positive / counter * 100})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
